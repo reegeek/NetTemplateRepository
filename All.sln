@@ -1,0 +1,56 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29920.165
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Template", "src\Template\Template.csproj", "{560B0CB5-764B-4E95-8948-B4DA39923089}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_Build", "_Build", "{5FCA33EC-29C8-4C4A-B793-929011FB5E66}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Props", "Props", "{75F98EA5-F366-4C51-BD1E-E19797A0D510}"
+	ProjectSection(SolutionItems) = preProject
+		Build\Common.Benchmark.props = Build\Common.Benchmark.props
+		Build\Common.props = Build\Common.props
+		Build\Common.Tests.props = Build\Common.Tests.props
+		src\Directory.Build.props = src\Directory.Build.props
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Targets", "Targets", "{D3B777DF-1040-46EE-AF62-EE03C4344AA1}"
+	ProjectSection(SolutionItems) = preProject
+		Build\DeleteGenerateBindingRedirects.target = Build\DeleteGenerateBindingRedirects.target
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Template.Tests", "src\Template.Tests\Template.Tests.csproj", "{9B72942D-85D0-49FA-B50E-F5815A64DA27}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Template.Benchmark", "src\Template.Benchmark\Template.Benchmark.csproj", "{98B3644E-8268-4915-A3AD-0CC22F72ABBE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{560B0CB5-764B-4E95-8948-B4DA39923089}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{560B0CB5-764B-4E95-8948-B4DA39923089}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{560B0CB5-764B-4E95-8948-B4DA39923089}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{560B0CB5-764B-4E95-8948-B4DA39923089}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9B72942D-85D0-49FA-B50E-F5815A64DA27}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9B72942D-85D0-49FA-B50E-F5815A64DA27}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9B72942D-85D0-49FA-B50E-F5815A64DA27}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9B72942D-85D0-49FA-B50E-F5815A64DA27}.Release|Any CPU.Build.0 = Release|Any CPU
+		{98B3644E-8268-4915-A3AD-0CC22F72ABBE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{98B3644E-8268-4915-A3AD-0CC22F72ABBE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{98B3644E-8268-4915-A3AD-0CC22F72ABBE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{98B3644E-8268-4915-A3AD-0CC22F72ABBE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{75F98EA5-F366-4C51-BD1E-E19797A0D510} = {5FCA33EC-29C8-4C4A-B793-929011FB5E66}
+		{D3B777DF-1040-46EE-AF62-EE03C4344AA1} = {5FCA33EC-29C8-4C4A-B793-929011FB5E66}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2392A8B2-6075-4D6E-8707-1CE1BB365317}
+	EndGlobalSection
+EndGlobal
