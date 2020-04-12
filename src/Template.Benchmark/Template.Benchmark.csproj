@@ -4,4 +4,8 @@
     <TargetFrameworks>$(DefaultTargetFrameworks)</TargetFrameworks>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Template\Template.csproj" />
+  </ItemGroup>
+
 </Project>
