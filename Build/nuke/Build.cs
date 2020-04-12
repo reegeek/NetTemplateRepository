@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using Nuke.Common;
 using Nuke.Common.CI;
@@ -12,23 +10,15 @@ using Nuke.Common.Git;
 using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
 using Nuke.Common.Tooling;
-using Nuke.Common.Tools.Coverlet;
 using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.GitVersion;
-using Nuke.Common.Utilities.Collections;
-using static Nuke.Common.ChangeLog.ChangelogTasks;
-using static Nuke.Common.EnvironmentInfo;
 using static Nuke.Common.IO.FileSystemTasks;
-using static Nuke.Common.IO.PathConstruction;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 
 [CheckBuildProjectConfigurations]
 [UnsetVisualStudioEnvironmentVariables]
 [GitHubActions(
     "continuous",
-    GitHubActionsImage.MacOs1014,
-    GitHubActionsImage.Ubuntu1604,
-    GitHubActionsImage.Ubuntu1804,
     GitHubActionsImage.WindowsServer2016R2,
     GitHubActionsImage.WindowsServer2019,
     On = new[] { GitHubActionsTrigger.Push },
@@ -36,7 +26,6 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
     InvokedTargets = new[] { nameof(Test), nameof(Pack) })]
 [AppVeyor(
     AppVeyorImage.VisualStudio2019,
-    AppVeyorImage.Ubuntu1804,
     SkipTags = true,
     InvokedTargets = new[] { nameof(Test), nameof(Pack) })]
 [AzurePipelines(

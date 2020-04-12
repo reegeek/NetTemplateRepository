@@ -16,7 +16,6 @@
 
 image:
   - Visual Studio 2019
-  - Ubuntu1804
 
 skip_tags: true
 
