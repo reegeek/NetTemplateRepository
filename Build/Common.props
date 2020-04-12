@@ -10,7 +10,7 @@
 
   <PropertyGroup Label="Project paths">
     <ResultDir Condition="'$(ResultDir)' == ''">$(RootDir)\.result</ResultDir>
-    <OutputPath>$(ResultDir)\bin\$(Platform)\$(Configuration)</OutputPath>
+    <OutputPath>$(ResultDir)\bin\\$(Configuration)\$(Platform)</OutputPath>
     <BaseIntermediateOutputPath>$(ResultDir)\obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
   </PropertyGroup>
 
