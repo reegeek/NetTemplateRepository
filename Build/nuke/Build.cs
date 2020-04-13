@@ -66,17 +66,11 @@ partial class Build : Nuke.Common.NukeBuild
     [CI] readonly AzurePipelines AzurePipelines;
     [Parameter("GitHub Token")] readonly string GitHubToken;
 
-
-    string ChangelogFile => RootDirectory / "CHANGELOG.md";
-
     AbsolutePath SourceDirectory => RootDirectory / "src";
     AbsolutePath ResultDirectory => RootDirectory / ".result";
     AbsolutePath PackagesDirectory => ResultDirectory / "packages";
     AbsolutePath TestResultDirectory => ResultDirectory / "test-results";
-
-    Project TemplateProject => Solution.GetProject("Template");
     IEnumerable<Project> TestProjects => Solution.GetProjects("*.Tests");
-
     IEnumerable<Project> AllProjects => Solution.AllProjects.Where(x=> SourceDirectory.Contains(x.Path));
 
     Target Clean => _ => _
@@ -109,7 +103,7 @@ partial class Build : Nuke.Common.NukeBuild
 
             DotNetBuild(s => s
                 .SetConfiguration(Configuration)
-                .SetNoRestore(InvokedTargets.Contains(Restore))
+                .EnableNoRestore()
                 .SetAssemblyVersion(GitVersion.AssemblySemVer)
                 .SetFileVersion(GitVersion.AssemblySemFileVer)
                 .SetInformationalVersion(GitVersion.InformationalVersion)
@@ -145,8 +139,8 @@ partial class Build : Nuke.Common.NukeBuild
             {
                 return _
                     .SetConfiguration(Configuration)
-                    .SetNoRestore(InvokedTargets.Contains(Restore))
-                    .SetNoBuild(InvokedTargets.Contains(Compile))
+                    .EnableNoRestore()
+                    .EnableNoBuild()
                     .ResetVerbosity()
                     .SetResultsDirectory(TestResultDirectory)
                     .CombineWith(testConfigurations, (_, v) => _
@@ -197,8 +191,8 @@ partial class Build : Nuke.Common.NukeBuild
     void ExecutesPack() =>
         DotNetPack(_ => _
             .SetProject(Solution)
-            .SetNoRestore(InvokedTargets.Contains(Restore))
-            .SetNoBuild(InvokedTargets.Contains(Compile))
+            .EnableNoBuild()
+            .EnableNoRestore()
             .SetConfiguration(Configuration)
             .SetOutputDirectory(PackagesDirectory)
             .SetVersion(GitVersion.NuGetVersionV2));
