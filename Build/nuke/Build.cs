@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Nuke.Common;
 using Nuke.Common.CI;
@@ -12,6 +13,7 @@ using Nuke.Common.ProjectModel;
 using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.GitVersion;
+using Nuke.Common.Utilities.Collections;
 using static Nuke.Common.IO.FileSystemTasks;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 
@@ -132,6 +134,12 @@ class Build : Nuke.Common.NukeBuild
                 .CombineWith(TestProjects, (_, v) => _
                     .SetProjectFile(v)
                     .SetLogger($"trx;LogFileName={v.Name}.trx")));
+
+            TestResultDirectory.GlobFiles("*.trx").ForEach(x =>
+                AzurePipelines?.PublishTestResults(
+                    type: AzurePipelinesTestResultsType.VSTest,
+                    title: $"{Path.GetFileNameWithoutExtension(x)} ({AzurePipelines.StageDisplayName})",
+                    files: new string[] { x }));
         });
 
     Target Pack => _ => _
