@@ -22,14 +22,13 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
 [UnsetVisualStudioEnvironmentVariables]
 [GitHubActions(
     "continuous",
-    GitHubActionsImage.WindowsServer2016R2,
-    GitHubActionsImage.WindowsServer2019,
+    GitHubActionsImage.WindowsLatest,
     On = new[] { GitHubActionsTrigger.Push },
     ImportGitHubTokenAs = nameof(GitHubToken),
     InvokedTargets = new[] { nameof(Test), nameof(Pack) })]
 [GitHubActions(
     "continuousCore",
-    GitHubActionsImage.Ubuntu1804,
+    GitHubActionsImage.UbuntuLatest,
     GitHubActionsImage.MacOsLatest,
     On = new[] { GitHubActionsTrigger.Push },
     ImportGitHubTokenAs = nameof(GitHubToken),
@@ -41,7 +40,7 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
 [AzurePipelines(
     suffix: null,
     AzurePipelinesImage.WindowsLatest,
-    AzurePipelinesImage.Ubuntu1804,
+    AzurePipelinesImage.UbuntuLatest,
     AzurePipelinesImage.MacOsLatest,
     InvokedTargets = new[] { nameof(Test), nameof(TestCoreOnly), nameof(Pack) },
     NonEntryTargets = new[] { nameof(Restore) },

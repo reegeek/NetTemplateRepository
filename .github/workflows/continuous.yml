@@ -19,26 +19,9 @@ name: continuous
 on: [push]
 
 jobs:
-  windows-2016:
-    name: windows-2016
-    runs-on: windows-2016
-    steps:
-      - uses: actions/checkout@v1
-      - name: Run './build.cmd Test Pack'
-        run: ./build.cmd Test Pack
-        env:
-            GitHubToken: ${{ secrets.GITHUB_TOKEN }}
-      - uses: actions/upload-artifact@v1
-        with:
-          name: test-results
-          path: .result/test-results
-      - uses: actions/upload-artifact@v1
-        with:
-          name: packages
-          path: .result/packages
-  windows-2019:
-    name: windows-2019
-    runs-on: windows-2019
+  windows-latest:
+    name: windows-latest
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v1
       - name: Run './build.cmd Test Pack'
