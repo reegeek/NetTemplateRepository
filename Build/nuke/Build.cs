@@ -43,7 +43,7 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
     AzurePipelinesImage.UbuntuLatest,
     AzurePipelinesImage.MacOsLatest,
     InvokedTargets = new[] { nameof(Test), nameof(TestCoreOnly), nameof(Pack), nameof(PackCoreOnly) },
-    NonEntryTargets = new[] { nameof(Restore), nameof(ExcludeNetFrameworkTarget) },
+    NonEntryTargets = new[] { nameof(Restore) },
     ExcludedTargets = new[] { nameof(Clean)})]
 
 partial class Build : Nuke.Common.NukeBuild
@@ -79,25 +79,11 @@ partial class Build : Nuke.Common.NukeBuild
 
     IEnumerable<Project> AllProjects => Solution.AllProjects.Where(x=> SourceDirectory.Contains(x.Path));
 
-    bool ExcludeNetFramework { get; set; } = false;
-
-    string[] Frameworks { get; set; }
-
     Target Clean => _ => _
         .Before(Restore)
         .Executes(() =>
         {
             EnsureCleanDirectory(ResultDirectory);
-        });
-
-    Target ExcludeNetFrameworkTarget => _ => _
-        .Before(Restore)
-        .Executes(() =>
-        {
-
-            ExcludeNetFramework = AllProjects.SelectMany(x => x.GetTargetFrameworks()).Distinct()
-                .Any(x => !x.Contains("standard") || !x.Contains("core"));
-            Logger.Info(ExcludeNetFramework ? "Exclude net framework" : "Include net framework");
         });
 
     Target Restore => _ => _
@@ -109,15 +95,15 @@ partial class Build : Nuke.Common.NukeBuild
 
     Target Compile => _ => _
         .DependsOn(Restore)
-        .Executes(ExecutesCompile);
-    void ExecutesCompile()
+        .Executes(() => ExecutesCompile(false));
+    void ExecutesCompile(bool excludeNetFramework)
     {
-        Logger.Info(ExcludeNetFramework ? "Exclude net framework" : "Include net framework");
-        if (ExcludeNetFramework)
+        Logger.Info(excludeNetFramework ? "Exclude net framework" : "Include net framework");
+        if (excludeNetFramework)
         {
             var frameworks =
                 from project in AllProjects
-                from framework in project.GetTargetFrameworks(ExcludeNetFramework)
+                from framework in project.GetTargetFrameworks(true)
                 select new {project, framework};
 
 
@@ -142,38 +128,17 @@ partial class Build : Nuke.Common.NukeBuild
         }
     }
 
-    Target Publish => _ => _
-        .DependsOn(Compile)
-        .Executes(() =>
-        {
-            var publishConfigurations =
-                from project in new[] { TemplateProject }
-                from framework in project.GetTargetFrameworks(ExcludeNetFramework)
-                select new { project, framework };
-
-            DotNetPublish(_ => _
-                    .EnableNoRestore()
-                    .EnableNoBuild()
-                    .SetConfiguration(Configuration)
-                    .SetAssemblyVersion(GitVersion.AssemblySemVer)
-                    .SetFileVersion(GitVersion.AssemblySemFileVer)
-                    .SetInformationalVersion(GitVersion.InformationalVersion)
-                    .CombineWith(publishConfigurations, (_, v) => _
-                        .SetProject(v.project)
-                        .SetFramework(v.framework)),
-                10);
-
-        });
-
     Target Test => _ => _
         .DependsOn(Compile)
         .Produces(TestResultDirectory / "*.trx")
-        .Executes(ExectutesTest);
-    void ExectutesTest()
+        .Executes(() => ExecutesTest(false));
+    void ExecutesTest(bool excludeNetFramework)
     {
+        Logger.Info(excludeNetFramework ? "Exclude net framework" : "Include net framework");
+
         var testConfigurations =
             from project in TestProjects
-            from framework in project.GetTargetFrameworks(ExcludeNetFramework)
+            from framework in project.GetTargetFrameworks(excludeNetFramework)
             select new {project, framework};
 
         DotNetTest(_ =>
@@ -199,13 +164,23 @@ partial class Build : Nuke.Common.NukeBuild
     }
 
     Target CompileCoreOnly => _ => _
-        .DependsOn(Restore, ExcludeNetFrameworkTarget)
-        .Executes(ExecutesCompile);
+        .DependsOn(Restore)
+        .Executes(() =>
+        {
+            var excludeNetFramework = AllProjects.SelectMany(x => x.GetTargetFrameworks()).Distinct()
+                .Any(x => !x.Contains("standard") || !x.Contains("core"));
+            ExecutesCompile(excludeNetFramework);
+        });
 
     Target TestCoreOnly => _ => _
         .DependsOn(CompileCoreOnly)
         .Produces(TestResultDirectory / "*.trx")
-        .Executes(ExectutesTest);
+        .Executes(() =>
+        {
+            var excludeNetFramework = AllProjects.SelectMany(x => x.GetTargetFrameworks()).Distinct()
+                .Any(x => !x.Contains("standard") || !x.Contains("core"));
+            ExecutesTest(excludeNetFramework);
+        });
 
 
     Target Pack => _ => _

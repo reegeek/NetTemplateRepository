@@ -62,7 +62,7 @@ stages:
         steps:
           - task: CmdLine@2
             inputs:
-              script: './build.cmd ExcludeNetFrameworkTarget Restore CompileCoreOnly --skip'
+              script: './build.cmd Restore CompileCoreOnly --skip'
       - job: TestCoreOnly
         displayName: '🚦 TestCoreOnly'
         dependsOn: [ CompileCoreOnly ]
@@ -75,7 +75,7 @@ stages:
               artifactName: test-results
               pathtoPublish: '.result/test-results'
       - job: PackCoreOnly
-        displayName: 'PackCoreOnly'
+        displayName: '📦 PackCoreOnly'
         dependsOn: [ CompileCoreOnly ]
         steps:
           - task: CmdLine@2
@@ -97,7 +97,7 @@ stages:
         steps:
           - task: CmdLine@2
             inputs:
-              script: './build.cmd ExcludeNetFrameworkTarget Restore CompileCoreOnly --skip'
+              script: './build.cmd Restore CompileCoreOnly --skip'
       - job: TestCoreOnly
         displayName: '🚦 TestCoreOnly'
         dependsOn: [ CompileCoreOnly ]
@@ -110,7 +110,7 @@ stages:
               artifactName: test-results
               pathtoPublish: '.result/test-results'
       - job: PackCoreOnly
-        displayName: 'PackCoreOnly'
+        displayName: '📦 PackCoreOnly'
         dependsOn: [ CompileCoreOnly ]
         steps:
           - task: CmdLine@2

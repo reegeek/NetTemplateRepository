@@ -60,7 +60,7 @@ partial class Build
                 {nameof(Test), "🚦"},
                 {nameof(TestCoreOnly), "🚦"},
                 {nameof(Pack), "📦"},
-                {nameof(Publish), "🚚"},
+                {nameof(PackCoreOnly), "📦"},
             };
             var symbol = dictionary.GetValueOrDefault(job.Name);
             var prefix = symbol == null ? "" : $"{symbol} ";
