@@ -6,6 +6,9 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Template", "src\Template\Template.csproj", "{560B0CB5-764B-4E95-8948-B4DA39923089}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_Build", "_Build", "{5FCA33EC-29C8-4C4A-B793-929011FB5E66}"
+	ProjectSection(SolutionItems) = preProject
+		GitVersion.yml = GitVersion.yml
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Props", "Props", "{75F98EA5-F366-4C51-BD1E-E19797A0D510}"
 	ProjectSection(SolutionItems) = preProject

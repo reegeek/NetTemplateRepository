@@ -192,9 +192,6 @@ partial class Build : Nuke.Common.NukeBuild
         {
             var repositoryUrl = $"https://{GitRepository.Endpoint}/{GitRepository.Identifier}/";
 
-            Logger.Info($"{nameof(GitVersion.VersionSourceSha)}: {GitVersion.VersionSourceSha}");
-            Logger.Info($"{nameof(GitVersion.Sha)}: {GitVersion.Sha}");
-
             return _    
                 .SetProject(Solution)
                 .SetNoRestore(InvokedTargets.Contains(Restore))
