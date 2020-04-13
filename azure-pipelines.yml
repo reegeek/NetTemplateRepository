@@ -39,13 +39,6 @@ stages:
             inputs:
               artifactName: test-results
               pathtoPublish: '.result/test-results'
-      - job: ExcludeNetFrameworkTarget
-        displayName: 'ExcludeNetFrameworkTarget'
-        dependsOn: [  ]
-        steps:
-          - task: CmdLine@2
-            inputs:
-              script: './build.cmd ExcludeNetFrameworkTarget --skip'
       - job: Pack
         displayName: '📦 Pack'
         dependsOn: [ Compile ]
@@ -63,20 +56,13 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
     jobs:
-      - job: ExcludeNetFrameworkTarget
-        displayName: 'ExcludeNetFrameworkTarget'
+      - job: CompileCoreOnly
+        displayName: '⚙️ CompileCoreOnly'
         dependsOn: [  ]
         steps:
           - task: CmdLine@2
             inputs:
-              script: './build.cmd ExcludeNetFrameworkTarget --skip'
-      - job: CompileCoreOnly
-        displayName: '⚙️ CompileCoreOnly'
-        dependsOn: [ ExcludeNetFrameworkTarget ]
-        steps:
-          - task: CmdLine@2
-            inputs:
-              script: './build.cmd Restore CompileCoreOnly --skip'
+              script: './build.cmd ExcludeNetFrameworkTarget Restore CompileCoreOnly --skip'
       - job: TestCoreOnly
         displayName: '🚦 TestCoreOnly'
         dependsOn: [ CompileCoreOnly ]
@@ -88,13 +74,13 @@ stages:
             inputs:
               artifactName: test-results
               pathtoPublish: '.result/test-results'
-      - job: Pack
-        displayName: '📦 Pack'
-        dependsOn: [  ]
+      - job: PackCoreOnly
+        displayName: 'PackCoreOnly'
+        dependsOn: [ CompileCoreOnly ]
         steps:
           - task: CmdLine@2
             inputs:
-              script: './build.cmd Pack --skip'
+              script: './build.cmd PackCoreOnly --skip'
           - task: PublishBuildArtifacts@1
             inputs:
               artifactName: packages
@@ -105,20 +91,13 @@ stages:
     pool:
       vmImage: 'macOS-latest'
     jobs:
-      - job: ExcludeNetFrameworkTarget
-        displayName: 'ExcludeNetFrameworkTarget'
+      - job: CompileCoreOnly
+        displayName: '⚙️ CompileCoreOnly'
         dependsOn: [  ]
         steps:
           - task: CmdLine@2
             inputs:
-              script: './build.cmd ExcludeNetFrameworkTarget --skip'
-      - job: CompileCoreOnly
-        displayName: '⚙️ CompileCoreOnly'
-        dependsOn: [ ExcludeNetFrameworkTarget ]
-        steps:
-          - task: CmdLine@2
-            inputs:
-              script: './build.cmd Restore CompileCoreOnly --skip'
+              script: './build.cmd ExcludeNetFrameworkTarget Restore CompileCoreOnly --skip'
       - job: TestCoreOnly
         displayName: '🚦 TestCoreOnly'
         dependsOn: [ CompileCoreOnly ]
@@ -130,13 +109,13 @@ stages:
             inputs:
               artifactName: test-results
               pathtoPublish: '.result/test-results'
-      - job: Pack
-        displayName: '📦 Pack'
-        dependsOn: [  ]
+      - job: PackCoreOnly
+        displayName: 'PackCoreOnly'
+        dependsOn: [ CompileCoreOnly ]
         steps:
           - task: CmdLine@2
             inputs:
-              script: './build.cmd Pack --skip'
+              script: './build.cmd PackCoreOnly --skip'
           - task: PublishBuildArtifacts@1
             inputs:
               artifactName: packages

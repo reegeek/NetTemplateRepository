@@ -42,8 +42,8 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
     AzurePipelinesImage.WindowsLatest,
     AzurePipelinesImage.UbuntuLatest,
     AzurePipelinesImage.MacOsLatest,
-    InvokedTargets = new[] { nameof(Test), nameof(TestCoreOnly), nameof(Pack) },
-    NonEntryTargets = new[] { nameof(Restore) },
+    InvokedTargets = new[] { nameof(Test), nameof(TestCoreOnly), nameof(Pack), nameof(PackCoreOnly) },
+    NonEntryTargets = new[] { nameof(Restore), nameof(ExcludeNetFrameworkTarget) },
     ExcludedTargets = new[] { nameof(Clean)})]
 
 partial class Build : Nuke.Common.NukeBuild
@@ -112,6 +112,7 @@ partial class Build : Nuke.Common.NukeBuild
         .Executes(ExecutesCompile);
     void ExecutesCompile()
     {
+        Logger.Info(ExcludeNetFramework ? "Exclude net framework" : "Include net framework");
         if (ExcludeNetFramework)
         {
             var frameworks =
@@ -210,15 +211,20 @@ partial class Build : Nuke.Common.NukeBuild
     Target Pack => _ => _
         .DependsOn(Compile)
         .Produces(PackagesDirectory / "*.nupkg")
-        .Executes(() =>
-        {
-            DotNetPack(_ => _
-                .SetProject(Solution)
-                .SetNoRestore(InvokedTargets.Contains(Restore))
-                .SetNoBuild(InvokedTargets.Contains(Compile))
-                .SetConfiguration(Configuration)
-                .SetOutputDirectory(PackagesDirectory)
-                .SetVersion(GitVersion.NuGetVersionV2));
-        });
+        .Executes(ExecutesPack);
 
+    Target PackCoreOnly => _ => _
+        .DependsOn(CompileCoreOnly)
+        .Produces(PackagesDirectory / "*.nupkg")
+        .Executes(ExecutesPack);
+
+
+    void ExecutesPack() =>
+        DotNetPack(_ => _
+            .SetProject(Solution)
+            .SetNoRestore(InvokedTargets.Contains(Restore))
+            .SetNoBuild(InvokedTargets.Contains(Compile))
+            .SetConfiguration(Configuration)
+            .SetOutputDirectory(PackagesDirectory)
+            .SetVersion(GitVersion.NuGetVersionV2));
 }

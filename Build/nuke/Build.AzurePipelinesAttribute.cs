@@ -29,7 +29,7 @@ partial class Build
                 case AzurePipelinesImage.Vs2017Win2016:
                 case AzurePipelinesImage.Vs2015Win2012R2:
                 case AzurePipelinesImage.Win1803:
-                    targetToExcludes = new []{ nameof(TestCoreOnly), nameof(CompileCoreOnly)};
+                    targetToExcludes = new []{ nameof(TestCoreOnly), nameof(CompileCoreOnly), nameof(PackCoreOnly)};
                     break;
                 case AzurePipelinesImage.Ubuntu1604:
                 case AzurePipelinesImage.Ubuntu1804:
@@ -37,7 +37,7 @@ partial class Build
                 case AzurePipelinesImage.MacOsLatest:
                 case AzurePipelinesImage.MacOs1014:
                 case AzurePipelinesImage.MacOs1013:
-                    targetToExcludes = new[] { nameof(Test), nameof(Compile) };
+                    targetToExcludes = new[] { nameof(Test), nameof(Compile), nameof(Pack) };
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(image), image, null);
