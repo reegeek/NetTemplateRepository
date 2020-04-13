@@ -103,7 +103,7 @@ partial class Build : Nuke.Common.NukeBuild
 
             DotNetBuild(s => s
                 .SetConfiguration(Configuration)
-                .EnableNoRestore()
+                .SetNoRestore(InvokedTargets.Contains(Restore))
                 .SetAssemblyVersion(GitVersion.AssemblySemVer)
                 .SetFileVersion(GitVersion.AssemblySemFileVer)
                 .SetInformationalVersion(GitVersion.InformationalVersion)
@@ -139,16 +139,15 @@ partial class Build : Nuke.Common.NukeBuild
             {
                 return _
                     .SetConfiguration(Configuration)
-                    .EnableNoRestore()
-                    .EnableNoBuild()
+                    .SetNoRestore(InvokedTargets.Contains(Restore))
+                    .SetNoBuild(InvokedTargets.Contains(Compile))
                     .ResetVerbosity()
                     .SetResultsDirectory(TestResultDirectory)
                     .CombineWith(testConfigurations, (_, v) => _
                         .SetProjectFile(v.project)
                         .SetFramework(v.framework)
                         .SetLogger($"trx;LogFileName={v.project.Name}.trx"));
-            },
-            10);
+            });
 
         TestResultDirectory.GlobFiles("*.trx").ForEach(x =>
             AzurePipelines?.PublishTestResults(
@@ -191,8 +190,8 @@ partial class Build : Nuke.Common.NukeBuild
     void ExecutesPack() =>
         DotNetPack(_ => _
             .SetProject(Solution)
-            .EnableNoBuild()
-            .EnableNoRestore()
+            .SetNoRestore(InvokedTargets.Contains(Restore))
+            .SetNoBuild(InvokedTargets.Contains(Compile))
             .SetConfiguration(Configuration)
             .SetOutputDirectory(PackagesDirectory)
             .SetVersion(GitVersion.NuGetVersionV2));
