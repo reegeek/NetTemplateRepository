@@ -202,7 +202,7 @@ partial class Build : Nuke.Common.NukeBuild
                 .SetRepositoryType("git")
                 .SetRepositoryUrl(repositoryUrl)
                 .SetProperty("RepositoryCommit", GitVersion.Sha)
-                .SetPackageReleaseNotes($"{repositoryUrl}releases/v{GitVersion.FullSemVer}")
+                .SetPackageReleaseNotes($"{repositoryUrl}releases/v{GitVersion.MajorMinorPatch}")
                 .SetAuthors("Reegeek")
                 .SetProperty("Owners", "Reegeek")
                 .SetPackageProjectUrl(repositoryUrl)
