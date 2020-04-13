@@ -33,6 +33,16 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_Misc", "_Misc", "{AB146ED7
 		README.md = README.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Misc", "Misc", "{E5E03327-3D04-4E5D-A3FB-39A2701333AD}"
+	ProjectSection(SolutionItems) = preProject
+		appveyor.yml = appveyor.yml
+		azure-pipelines.yml = azure-pipelines.yml
+		build.cmd = build.cmd
+		build.ps1 = build.ps1
+		build.sh = build.sh
+		.github\workflows\continuous.yml = .github\workflows\continuous.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -62,6 +72,7 @@ Global
 		{D3B777DF-1040-46EE-AF62-EE03C4344AA1} = {5FCA33EC-29C8-4C4A-B793-929011FB5E66}
 		{5D7CE6E3-1780-47A6-B709-6BFAD2501944} = {5FCA33EC-29C8-4C4A-B793-929011FB5E66}
 		{60846712-3A4E-4AD9-B6B0-0F525158056B} = {5D7CE6E3-1780-47A6-B709-6BFAD2501944}
+		{E5E03327-3D04-4E5D-A3FB-39A2701333AD} = {5D7CE6E3-1780-47A6-B709-6BFAD2501944}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2392A8B2-6075-4D6E-8707-1CE1BB365317}

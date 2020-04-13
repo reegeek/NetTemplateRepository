@@ -6,7 +6,7 @@ Param(
 
 Write-Output "PowerShell $($PSVersionTable.PSEdition) version $($PSVersionTable.PSVersion)"
 
-Set-StrictMode -Version 2.0; $ErrorActionPreference = "Stop"; $ConfirmPreference = "None"; trap { exit 1 }
+Set-StrictMode -Version 2.0; $ErrorActionPreference = "Stop"; $ConfirmPreference = "None"; trap { Write-Error $_ -ErrorAction Continue; exit 1 }
 $PSScriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent
 
 ###########################################################################
@@ -14,14 +14,15 @@ $PSScriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent
 ###########################################################################
 
 $BuildProjectFile = "$PSScriptRoot\build\nuke\NukeBuild.csproj"
-$TempDirectory = "$PSScriptRoot\\.tmp"
+$TempDirectory = "$PSScriptRoot\.tmp"
 
-$DotNetGlobalFile = "$PSScriptRoot\\global.json"
-$DotNetInstallUrl = "https://raw.githubusercontent.com/dotnet/cli/master/scripts/obtain/dotnet-install.ps1"
+$DotNetGlobalFile = "$PSScriptRoot\global.json"
+$DotNetInstallUrl = "https://dot.net/v1/dotnet-install.ps1"
 $DotNetChannel = "Current"
 
 $env:DOTNET_SKIP_FIRST_TIME_EXPERIENCE = 1
 $env:DOTNET_CLI_TELEMETRY_OPTOUT = 1
+$env:NUGET_XMLDOC_MODE = "skip"
 
 ###########################################################################
 # EXECUTION
@@ -30,6 +31,14 @@ $env:DOTNET_CLI_TELEMETRY_OPTOUT = 1
 function ExecSafe([scriptblock] $cmd) {
     & $cmd
     if ($LASTEXITCODE) { exit $LASTEXITCODE }
+}
+
+# Print environment variables
+Get-Item -Path Env:*
+
+# Check if any dotnet is installed
+if ($null -ne (Get-Command "dotnet" -ErrorAction SilentlyContinue)) {
+    ExecSafe { & dotnet --info }
 }
 
 # If global.json exists, load expected version
