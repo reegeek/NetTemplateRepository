@@ -24,8 +24,8 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v1
-      - name: Run './build.cmd TestOnlyCore'
-        run: ./build.cmd TestOnlyCore
+      - name: Run './build.cmd TestCoreOnly'
+        run: ./build.cmd TestCoreOnly
         env:
             GitHubToken: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/upload-artifact@v1
@@ -37,8 +37,8 @@ jobs:
     runs-on: macOS-latest
     steps:
       - uses: actions/checkout@v1
-      - name: Run './build.cmd TestOnlyCore'
-        run: ./build.cmd TestOnlyCore
+      - name: Run './build.cmd TestCoreOnly'
+        run: ./build.cmd TestCoreOnly
         env:
             GitHubToken: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/upload-artifact@v1
