@@ -22,14 +22,14 @@ stages:
       vmImage: 'ubuntu-latest'
     jobs:
       - job: Compile
-        displayName: 'Compile'
+        displayName: '⚙️ Compile'
         dependsOn: [  ]
         steps:
           - task: CmdLine@2
             inputs:
               script: './build.cmd Restore Compile --skip'
       - job: Test
-        displayName: 'Test'
+        displayName: '🚦 Test'
         dependsOn: [ Compile ]
         steps:
           - task: CmdLine@2
@@ -40,14 +40,14 @@ stages:
               artifactName: test-results
               pathtoPublish: '.result/test-results'
       - job: Publish
-        displayName: 'Publish'
+        displayName: '🚚 Publish'
         dependsOn: [ Compile ]
         steps:
           - task: CmdLine@2
             inputs:
               script: './build.cmd Publish --skip'
       - job: Pack
-        displayName: 'Pack'
+        displayName: '📦 Pack'
         dependsOn: [ Publish ]
         steps:
           - task: CmdLine@2
@@ -64,14 +64,14 @@ stages:
       vmImage: 'windows-latest'
     jobs:
       - job: Compile
-        displayName: 'Compile'
+        displayName: '⚙️ Compile'
         dependsOn: [  ]
         steps:
           - task: CmdLine@2
             inputs:
               script: './build.cmd Restore Compile --skip'
       - job: Test
-        displayName: 'Test'
+        displayName: '🚦 Test'
         dependsOn: [ Compile ]
         steps:
           - task: CmdLine@2
@@ -82,14 +82,14 @@ stages:
               artifactName: test-results
               pathtoPublish: '.result/test-results'
       - job: Publish
-        displayName: 'Publish'
+        displayName: '🚚 Publish'
         dependsOn: [ Compile ]
         steps:
           - task: CmdLine@2
             inputs:
               script: './build.cmd Publish --skip'
       - job: Pack
-        displayName: 'Pack'
+        displayName: '📦 Pack'
         dependsOn: [ Publish ]
         steps:
           - task: CmdLine@2
@@ -106,14 +106,14 @@ stages:
       vmImage: 'macOS-latest'
     jobs:
       - job: Compile
-        displayName: 'Compile'
+        displayName: '⚙️ Compile'
         dependsOn: [  ]
         steps:
           - task: CmdLine@2
             inputs:
               script: './build.cmd Restore Compile --skip'
       - job: Test
-        displayName: 'Test'
+        displayName: '🚦 Test'
         dependsOn: [ Compile ]
         steps:
           - task: CmdLine@2
@@ -124,14 +124,14 @@ stages:
               artifactName: test-results
               pathtoPublish: '.result/test-results'
       - job: Publish
-        displayName: 'Publish'
+        displayName: '🚚 Publish'
         dependsOn: [ Compile ]
         steps:
           - task: CmdLine@2
             inputs:
               script: './build.cmd Publish --skip'
       - job: Pack
-        displayName: 'Pack'
+        displayName: '📦 Pack'
         dependsOn: [ Publish ]
         steps:
           - task: CmdLine@2

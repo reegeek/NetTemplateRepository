@@ -13,6 +13,7 @@ using Nuke.Common.ProjectModel;
 using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.GitVersion;
+using Nuke.Common.Utilities;
 using Nuke.Common.Utilities.Collections;
 using static Nuke.Common.IO.FileSystemTasks;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
@@ -26,18 +27,24 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
     On = new[] { GitHubActionsTrigger.Push },
     ImportGitHubTokenAs = nameof(GitHubToken),
     InvokedTargets = new[] { nameof(Test), nameof(Pack) })]
+[GitHubActions(
+    "continuousCore",
+    GitHubActionsImage.Ubuntu1804,
+    GitHubActionsImage.MacOsLatest,
+    On = new[] { GitHubActionsTrigger.Push },
+    ImportGitHubTokenAs = nameof(GitHubToken),
+    InvokedTargets = new[] { nameof(TestOnlyCore) })]
 [AppVeyor(
     AppVeyorImage.VisualStudio2019,
     SkipTags = true,
     InvokedTargets = new[] { nameof(Test), nameof(Pack) })]
 [AzurePipelines(
     suffix: null,
-    AzurePipelinesImage.UbuntuLatest,
     AzurePipelinesImage.WindowsLatest,
-    AzurePipelinesImage.MacOsLatest,
     InvokedTargets = new[] { nameof(Test), nameof(Pack) },
     NonEntryTargets = new[] { nameof(Restore) },
     ExcludedTargets = new[] { nameof(Clean)})]
+
 partial class Build : Nuke.Common.NukeBuild
 {
     /// Support plugins are available for:
@@ -69,12 +76,24 @@ partial class Build : Nuke.Common.NukeBuild
     Project TemplateProject => Solution.GetProject("Template");
     IEnumerable<Project> TestProjects => Solution.GetProjects("*.Tests");
 
+    IEnumerable<Project> AllProjects => Solution.AllProjects.Where(x=> SourceDirectory.Contains(x.Path));
+
+    bool ExcludeNetFramework { get; set; } = false;
+
+    string[] Frameworks { get; set; }
 
     Target Clean => _ => _
         .Before(Restore)
         .Executes(() =>
         {
             EnsureCleanDirectory(ResultDirectory);
+        });
+
+    Target ExcludeNetFrameworkTarget => _ => _
+        .Before(Restore)
+        .Executes(() =>
+        {
+            ExcludeNetFramework = true;
         });
 
     Target Restore => _ => _
@@ -88,13 +107,35 @@ partial class Build : Nuke.Common.NukeBuild
         .DependsOn(Restore)
         .Executes(() =>
         {
-            DotNetBuild(s => s
-                .SetProjectFile(Solution)
-                .SetConfiguration(Configuration)
-                .EnableNoRestore()
-                .SetAssemblyVersion(GitVersion.AssemblySemVer)
-                .SetFileVersion(GitVersion.AssemblySemFileVer)
-                .SetInformationalVersion(GitVersion.InformationalVersion));
+            Logger.Info(ExcludeNetFramework ? "Exclude net framework" : "Include net framework");
+
+            if (ExcludeNetFramework)
+            {
+                var frameworks =
+                    from project in AllProjects
+                    from framework in project.GetTargetFrameworks(ExcludeNetFramework)
+                    select new {project, framework};
+
+
+                DotNetBuild(s => s
+                    .SetConfiguration(Configuration)
+                    .EnableNoRestore()
+                    .SetAssemblyVersion(GitVersion.AssemblySemVer)
+                    .SetFileVersion(GitVersion.AssemblySemFileVer)
+                    .SetInformationalVersion(GitVersion.InformationalVersion)
+                    .CombineWith(frameworks, (s, f) => s
+                        .SetFramework(f.framework)
+                        .SetProjectFile(f.project)));
+            }
+            else
+            {
+                DotNetBuild(s => s
+                    .SetConfiguration(Configuration)
+                    .EnableNoRestore()
+                    .SetAssemblyVersion(GitVersion.AssemblySemVer)
+                    .SetFileVersion(GitVersion.AssemblySemFileVer)
+                    .SetInformationalVersion(GitVersion.InformationalVersion));
+            }
         });
 
     Target Publish => _ => _
@@ -103,7 +144,7 @@ partial class Build : Nuke.Common.NukeBuild
         {
             var publishConfigurations =
                 from project in new[] { TemplateProject }
-                from framework in project.GetTargetFrameworks()
+                from framework in project.GetTargetFrameworks(ExcludeNetFramework)
                 select new { project, framework };
 
             DotNetPublish(_ => _
@@ -125,15 +166,23 @@ partial class Build : Nuke.Common.NukeBuild
         .Produces(TestResultDirectory / "*.trx")
         .Executes(() =>
         {
+            var testConfigurations =
+                from project in TestProjects
+                from framework in project.GetTargetFrameworks(ExcludeNetFramework)
+                select new { project, framework };
+
+
             DotNetTest(_ => _
                 .SetConfiguration(Configuration)
                 .EnableNoRestore()
                 .EnableNoBuild()
                 .ResetVerbosity()
                 .SetResultsDirectory(TestResultDirectory)
-                .CombineWith(TestProjects, (_, v) => _
-                    .SetProjectFile(v)
-                    .SetLogger($"trx;LogFileName={v.Name}.trx")));
+                .CombineWith(testConfigurations, (_, v) => _
+                    .SetProjectFile(v.project)
+                    .SetFramework(v.framework)
+                    .SetLogger($"trx;LogFileName={v.project.Name}.trx")),
+                10);
 
             TestResultDirectory.GlobFiles("*.trx").ForEach(x =>
                 AzurePipelines?.PublishTestResults(
@@ -141,6 +190,37 @@ partial class Build : Nuke.Common.NukeBuild
                     title: $"{Path.GetFileNameWithoutExtension(x)} ({AzurePipelines.StageDisplayName})",
                     files: new string[] { x }));
         });
+
+    Target TestOnlyCore => _ => _
+        .DependsOn(Compile, ExcludeNetFrameworkTarget)
+        .Produces(TestResultDirectory / "*.trx")
+        .Executes(() =>
+        {
+            var testConfigurations =
+                from project in TestProjects
+                from framework in project.GetTargetFrameworks(ExcludeNetFramework)
+                select new { project, framework };
+
+
+            DotNetTest(_ => _
+                    .SetConfiguration(Configuration)
+                    .EnableNoRestore()
+                    .EnableNoBuild()
+                    .ResetVerbosity()
+                    .SetResultsDirectory(TestResultDirectory)
+                    .CombineWith(testConfigurations, (_, v) => _
+                        .SetProjectFile(v.project)
+                        .SetFramework(v.framework)
+                        .SetLogger($"trx;LogFileName={v.project.Name}.trx")),
+                10);
+
+            TestResultDirectory.GlobFiles("*.trx").ForEach(x =>
+                AzurePipelines?.PublishTestResults(
+                    type: AzurePipelinesTestResultsType.VSTest,
+                    title: $"{Path.GetFileNameWithoutExtension(x)} ({AzurePipelines.StageDisplayName})",
+                    files: new string[] { x }));
+        });
+
 
     Target Pack => _ => _
         .DependsOn(Publish)
