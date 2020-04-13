@@ -190,7 +190,11 @@ partial class Build : Nuke.Common.NukeBuild
     void ExecutesPack() =>
         DotNetPack(_ =>
         {
-            var repositoryUrl = $"http://{GitRepository.Endpoint}/{GitRepository.Identifier}/";
+            var repositoryUrl = $"https://{GitRepository.Endpoint}/{GitRepository.Identifier}/";
+
+            Logger.Info($"{nameof(GitVersion.VersionSourceSha)}: {GitVersion.VersionSourceSha}");
+            Logger.Info($"{nameof(GitVersion.Sha)}: {GitVersion.Sha}");
+
             return _    
                 .SetProject(Solution)
                 .SetNoRestore(InvokedTargets.Contains(Restore))
@@ -200,8 +204,8 @@ partial class Build : Nuke.Common.NukeBuild
                 .DisablePackageRequireLicenseAcceptance()
                 .SetRepositoryType("git")
                 .SetRepositoryUrl(repositoryUrl)
-                .SetProperty("commit", GitVersion.Sha)
-                .SetPackageReleaseNotes($"{repositoryUrl}releases/v{GitVersion.MajorMinorPatch}")
+                .SetProperty("RepositoryCommit", GitVersion.Sha)
+                .SetPackageReleaseNotes($"{repositoryUrl}releases/v{GitVersion.FullSemVer}")
                 .SetAuthors("Reegeek")
                 .SetProperty("Owners", "Reegeek")
                 .SetPackageProjectUrl(repositoryUrl)
