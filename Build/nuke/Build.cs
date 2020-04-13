@@ -93,7 +93,10 @@ partial class Build : Nuke.Common.NukeBuild
         .Before(Restore)
         .Executes(() =>
         {
-            ExcludeNetFramework = true;
+
+            ExcludeNetFramework = AllProjects.SelectMany(x => x.GetTargetFrameworks()).Distinct()
+                .Any(x => !x.Contains("standard") || !x.Contains("core"));
+            Logger.Info(ExcludeNetFramework ? "Exclude net framework" : "Include net framework");
         });
 
     Target Restore => _ => _
@@ -107,8 +110,6 @@ partial class Build : Nuke.Common.NukeBuild
         .DependsOn(Restore)
         .Executes(() =>
         {
-            Logger.Info(ExcludeNetFramework ? "Exclude net framework" : "Include net framework");
-
             if (ExcludeNetFramework)
             {
                 var frameworks =
@@ -119,7 +120,7 @@ partial class Build : Nuke.Common.NukeBuild
 
                 DotNetBuild(s => s
                     .SetConfiguration(Configuration)
-                    .EnableNoRestore()
+                    .SetNoRestore(InvokedTargets.Contains(Restore))
                     .SetAssemblyVersion(GitVersion.AssemblySemVer)
                     .SetFileVersion(GitVersion.AssemblySemFileVer)
                     .SetInformationalVersion(GitVersion.InformationalVersion)
@@ -171,17 +172,19 @@ partial class Build : Nuke.Common.NukeBuild
                 from framework in project.GetTargetFrameworks(ExcludeNetFramework)
                 select new { project, framework };
 
-
-            DotNetTest(_ => _
-                .SetConfiguration(Configuration)
-                .EnableNoRestore()
-                .EnableNoBuild()
-                .ResetVerbosity()
-                .SetResultsDirectory(TestResultDirectory)
-                .CombineWith(testConfigurations, (_, v) => _
-                    .SetProjectFile(v.project)
-                    .SetFramework(v.framework)
-                    .SetLogger($"trx;LogFileName={v.project.Name}.trx")),
+            DotNetTest(_ =>
+                {
+                    return _
+                        .SetConfiguration(Configuration)
+                        .SetNoRestore(InvokedTargets.Contains(Restore))
+                        .SetNoBuild(InvokedTargets.Contains(Compile))
+                        .ResetVerbosity()
+                        .SetResultsDirectory(TestResultDirectory)
+                        .CombineWith(testConfigurations, (_, v) => _
+                            .SetProjectFile(v.project)
+                            .SetFramework(v.framework)
+                            .SetLogger($"trx;LogFileName={v.project.Name}.trx"));
+                },
                 10);
 
             TestResultDirectory.GlobFiles("*.trx").ForEach(x =>
@@ -192,45 +195,21 @@ partial class Build : Nuke.Common.NukeBuild
         });
 
     Target TestOnlyCore => _ => _
-        .DependsOn(Compile, ExcludeNetFrameworkTarget)
+        .DependsOn(ExcludeNetFrameworkTarget, Test)
         .Produces(TestResultDirectory / "*.trx")
         .Executes(() =>
-        {
-            var testConfigurations =
-                from project in TestProjects
-                from framework in project.GetTargetFrameworks(ExcludeNetFramework)
-                select new { project, framework };
-
-
-            DotNetTest(_ => _
-                    .SetConfiguration(Configuration)
-                    .EnableNoRestore()
-                    .EnableNoBuild()
-                    .ResetVerbosity()
-                    .SetResultsDirectory(TestResultDirectory)
-                    .CombineWith(testConfigurations, (_, v) => _
-                        .SetProjectFile(v.project)
-                        .SetFramework(v.framework)
-                        .SetLogger($"trx;LogFileName={v.project.Name}.trx")),
-                10);
-
-            TestResultDirectory.GlobFiles("*.trx").ForEach(x =>
-                AzurePipelines?.PublishTestResults(
-                    type: AzurePipelinesTestResultsType.VSTest,
-                    title: $"{Path.GetFileNameWithoutExtension(x)} ({AzurePipelines.StageDisplayName})",
-                    files: new string[] { x }));
-        });
+        { });
 
 
     Target Pack => _ => _
-        .DependsOn(Publish)
+        .DependsOn(Compile)
         .Produces(PackagesDirectory / "*.nupkg")
         .Executes(() =>
         {
             DotNetPack(_ => _
                 .SetProject(Solution)
-                .EnableNoRestore()
-                .EnableNoBuild()
+                .SetNoRestore(InvokedTargets.Contains(Restore))
+                .SetNoBuild(InvokedTargets.Contains(Compile))
                 .SetConfiguration(Configuration)
                 .SetOutputDirectory(PackagesDirectory)
                 .SetVersion(GitVersion.NuGetVersionV2));
