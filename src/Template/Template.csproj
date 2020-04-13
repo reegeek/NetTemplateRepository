@@ -4,4 +4,10 @@
     <TargetFrameworks>$(DefaultTargetFrameworks)</TargetFrameworks>
   </PropertyGroup>
 
+  <PropertyGroup Label="Nuget">
+    <Description>Template of .net project</Description>
+    <PackageTags>C#;F#</PackageTags>
+    <Company />
+  </PropertyGroup>
+
 </Project>

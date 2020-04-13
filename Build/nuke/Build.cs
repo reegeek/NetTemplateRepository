@@ -188,11 +188,23 @@ partial class Build : Nuke.Common.NukeBuild
 
 
     void ExecutesPack() =>
-        DotNetPack(_ => _
-            .SetProject(Solution)
-            .SetNoRestore(InvokedTargets.Contains(Restore))
-            .SetNoBuild(InvokedTargets.Contains(Compile))
-            .SetConfiguration(Configuration)
-            .SetOutputDirectory(PackagesDirectory)
-            .SetVersion(GitVersion.NuGetVersionV2));
+        DotNetPack(_ =>
+        {
+            var repositoryUrl = $"http://{GitRepository.Endpoint}/{GitRepository.Identifier}/";
+            return _    
+                .SetProject(Solution)
+                .SetNoRestore(InvokedTargets.Contains(Restore))
+                .SetNoBuild(InvokedTargets.Contains(Compile))
+                .SetConfiguration(Configuration)
+                .SetOutputDirectory(PackagesDirectory)
+                .DisablePackageRequireLicenseAcceptance()
+                .SetRepositoryType("git")
+                .SetRepositoryUrl(repositoryUrl)
+                .SetProperty("commit", GitVersion.Sha)
+                .SetPackageReleaseNotes($"{repositoryUrl}releases/v{GitVersion.MajorMinorPatch}")
+                .SetAuthors("Reegeek")
+                .SetProperty("Owners", "Reegeek")
+                .SetPackageProjectUrl(repositoryUrl)
+                .SetVersion(GitVersion.NuGetVersionV2);
+        });
 }

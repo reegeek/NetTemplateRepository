@@ -18,7 +18,6 @@
     <LangVersion>Latest</LangVersion>
   </PropertyGroup>
 
-
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DefineConstants>TRACE;DEBUG</DefineConstants>
     <DebugSymbols>true</DebugSymbols>
